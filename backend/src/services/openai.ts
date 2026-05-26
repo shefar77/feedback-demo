@@ -98,7 +98,7 @@ ${FEW_SHOT[rating]}
 Now generate ${count} NEW distinct ${rating}-star reviews for "${bizName}" in ${langLabel}. Return only the JSON array, nothing else.`;
 
   const model = genAI.getGenerativeModel({
-    model: 'gemini-1.5-flash',
+    model: 'gemini-2.0-flash',
     generationConfig: {
       temperature: 0.9,
       maxOutputTokens: 900,

@@ -14,15 +14,26 @@ const PORT = process.env.PORT ?? 4000;
 app.use(helmet());
 app.use(cors({ origin: process.env.FRONTEND_URL ?? '*' }));
 app.use(express.json({ limit: '10kb' }));
+app.post('/generate-feedback', async (req, res) => {
+  console.log('HIT generate-feedback');
+
+  res.json({
+    suggestions: [
+      "Great experience!",
+      "Loved the service.",
+      "Could improve response time."
+    ]
+  });
+});
 app.use(morgan('dev'));
 
 const limiter = rateLimit({
-  windowMs: 60 * 1000,
+  windowMs: 60 * 1000,  
   max: 30,
   message: { error: 'Too many requests, please try again later.' },
 });
-
 app.use('/generate-feedback', limiter);
+
 app.use('/generate-feedback', generateRouter);
 app.use('/submit-feedback',   submitRouter);
 app.use('/analytics',         analyticsRouter);
