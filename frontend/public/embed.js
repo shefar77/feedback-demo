@@ -1,6 +1,6 @@
 (function () {
   const currentScript = document.currentScript;
-  const placeId  = currentScript?.getAttribute('data-place-id') ?? '';
+  const placeId  = currentScript?.getAttribute("ChIJK9ZfSh-6bTkRJUzXVIgzQTc");
   const biz      = encodeURIComponent(currentScript?.getAttribute('data-biz') ?? 'My Business');
   const category = currentScript?.getAttribute('data-category') ?? 'retail';
   const lang     = currentScript?.getAttribute('data-lang') ?? 'en';

@@ -60,7 +60,7 @@ export default function FeedbackFlow({ context }: Props) {
         },
         text: editedText,
       });
-      setGoogleUrl(res.googleReviewUrl || buildGoogleReviewUrl(context.placeId));
+      setGoogleUrl(buildGoogleReviewUrl("ChIJK9ZfSh-6bTkRJUzXVIgzQTc"));
       setStep(4);
     } catch {
       setError('Submission failed. Please try again.');
