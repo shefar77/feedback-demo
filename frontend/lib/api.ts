@@ -23,5 +23,5 @@ export async function submitFeedback(payload: SubmitRequest): Promise<SubmitResp
 }
 
 export function buildGoogleReviewUrl(placeId: string): string {
-  return `https://search.google.com/local/writereview?placeid=${placeId}`;
+  return `https://search.google.com/local/writereview?placeid=ChIJK9ZfSh-6bTkRJUzXVIgzQTc`;
 }

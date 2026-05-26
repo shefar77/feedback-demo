@@ -22,24 +22,10 @@ generateRouter.post('/', async (req: Request, res: Response) => {
   }
 
   const { rating, context } = parsed.data;
-  const redis = getRedis();
-
-  // Cache key: rating + category + lang (NOT placeId — suggestions are generic enough to share)
-  const cacheKey = `suggestions:${rating}:${context.category}:${context.lang}`;
   const start = Date.now();
 
   try {
     // Try cache first
-    const cached = await redis.get(cacheKey).catch(() => null);
-    if (cached) {
-      return res.json({
-        suggestions: JSON.parse(cached),
-        cached: true,
-        latencyMs: Date.now() - start,
-      });
-    }
-
-    // Generate via OpenAI
     const suggestions = await generateSuggestions({
       rating,
       bizName: context.bizName,
@@ -48,16 +34,13 @@ generateRouter.post('/', async (req: Request, res: Response) => {
       count: 3,
     });
 
-    // Cache result
-    const ttl = parseInt(process.env.CACHE_TTL_SECONDS ?? '3600', 10);
-    await redis.setex(cacheKey, ttl, JSON.stringify(suggestions)).catch(() => {});
-
     return res.json({
       suggestions,
       cached: false,
       latencyMs: Date.now() - start,
     });
-  } catch (err) {
+  } 
+  catch (err){
     console.error('Generation error:', err);
     return res.status(502).json({ error: 'Failed to generate suggestions. Please retry.' });
   }

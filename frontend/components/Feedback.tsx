@@ -65,7 +65,7 @@ export default function FeedbackFlow({ context }: Props) {
 
     const res = await submitFeedback(payload);
 
-    setGoogleUrl(res.googleReviewUrl || buildGoogleReviewUrl(payload.context.placeId));
+    setGoogleUrl(buildGoogleReviewUrl("ChIJK9ZfSh-6bTkRJUzXVIgzQTc"));
     setStep(4);
   } catch (err) {
     console.error(err);
