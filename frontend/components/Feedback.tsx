@@ -50,28 +50,22 @@ export default function FeedbackFlow({ context }: Props) {
   async function handleSubmit() {
     setError('');
     try {
-    const payload = {
-      rating,
-      context: {
-        placeId: context?.placeId || 'demo', 
-        bizName: context?.bizName || 'Rambaug Palace',
-        category: context?.category || 'cafe',
-        lang: context?.lang || 'en',
-      },
-      text: editedText,
-    };
-
-    console.log("FINAL PAYLOAD:", payload); 
-
-    const res = await submitFeedback(payload);
-
-    setGoogleUrl(buildGoogleReviewUrl("ChIJK9ZfSh-6bTkRJUzXVIgzQTc"));
-    setStep(4);
-  } catch (err) {
-    console.error(err);
-    setError('Submission failed. Please try again.');
+      const res = await submitFeedback({
+        rating,
+        context: {
+          placeId: context.placeId,
+          bizName: context.bizName,
+          category: context.category,
+          lang: context.lang,
+        },
+        text: editedText,
+      });
+      setGoogleUrl(res.googleReviewUrl || buildGoogleReviewUrl(context.placeId));
+      setStep(4);
+    } catch {
+      setError('Submission failed. Please try again.');
+    }
   }
-}
 
   function handleReset() {
     setStep(1);

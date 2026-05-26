@@ -92,11 +92,6 @@ export default function StepGoogle({ rating, finalText, googleUrl, onReset }: Pr
         {redirecting ? 'Opening Google Reviews…' : 'Copy & Post on Google Reviews'}
       </button>
 
-      {/* Mobile hint */}
-      <p className="text-xs text-[var(--text-3)] max-w-xs mb-6 leading-relaxed">
-        On mobile — long press in the Google review box and tap <strong>Paste</strong>
-      </p>
-
       <button
         onClick={onReset}
         className="text-sm text-[var(--text-3)] hover:text-[var(--text-2)] transition-colors"
