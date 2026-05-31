@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+* { box-sizing: border-box; }
+
+html, body {
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
 :root {
   --accent: #c8441a;
   --accent-hover: #a83612;
@@ -61,3 +68,6 @@
 .float-a { animation: floatA 7s ease-in-out infinite; }
 .float-b { animation: floatB 8s ease-in-out infinite; }
 .float-c { animation: floatA 9s ease-in-out infinite; animation-delay: 1.5s; }
+
+button { -webkit-tap-highlight-color: transparent; }
+textarea { font-size: 16px !important; }
