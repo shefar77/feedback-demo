@@ -14,31 +14,27 @@ type CopyState = 'idle' | 'copied' | 'failed';
 export default function StepGoogle({ rating, finalText, googleUrl, onReset }: Props) {
   const [copyState, setCopyState] = useState<CopyState>('idle');
   const [redirecting, setRedirecting] = useState(false);
-  const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
-  const preview = finalText.length > 160 ? finalText.slice(0, 160) + '…' : finalText;
+  const stars   = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+  const preview = finalText.length > 180 ? finalText.slice(0, 180) + '…' : finalText;
 
   async function handlePostOnGoogle() {
-    setRedirecting(true);
-
     try {
       await navigator.clipboard.writeText(finalText);
       setCopyState('copied');
-    } catch {
+    } 
+    catch {
       try {
-        const textarea = document.createElement('textarea');
-        textarea.value = finalText;
-        textarea.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0';
-        document.body.appendChild(textarea);
-        textarea.focus();
-        textarea.select();
-        const success = document.execCommand('copy');
-        document.body.removeChild(textarea);
-        setCopyState(success ? 'copied' : 'failed');
-      } catch {
-        setCopyState('failed');
-      }
+        const ta = document.createElement('textarea');
+        ta.value = finalText;
+        ta.style.cssText = 'position:fixed;top:-9999px;opacity:0';
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        setCopyState(ok ? 'copied' : 'failed');
+      } 
+      catch { setCopyState('failed'); }
     }
-
     setTimeout(() => {
       window.open(googleUrl, '_blank', 'noopener,noreferrer');
       setRedirecting(false);
@@ -46,21 +42,31 @@ export default function StepGoogle({ rating, finalText, googleUrl, onReset }: Pr
   }
 
   return (
-    <div className="flex flex-col items-center text-center">
-      {/* Success icon */}
-      <div className="w-16 h-16 rounded-full bg-green-50 border-2 border-green-200 flex items-center justify-center mb-5 text-2xl">
-        🎉
+    <div className="fade-up" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+      <div style={{
+        width: '64px', height: '64px', borderRadius: '50%',
+        background: 'linear-gradient(135deg, #d1fae5, #a7f3d0)',
+        border: '2px solid #6ee7b7',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        marginBottom: '20px',
+        boxShadow: '0 4px 20px rgba(16,185,129,0.25)',
+      }}>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M5 13l4 4L19 7" stroke="#059669" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
       </div>
 
-      <h2 className="font-serif text-3xl mb-2">Review saved!</h2>
-      <p className="text-sm text-[var(--text-2)] max-w-sm mb-6 leading-relaxed">
-        Your {rating}-star feedback has been recorded. Go forward and post it on Google to let others know!
+      <h2 style={{ fontFamily: 'Fraunces, serif', fontSize: '26px', fontWeight: 300, letterSpacing: '-0.03em', color: '#1a1714', marginBottom: '8px' }}>
+        Review Saved!
+      </h2>
+      <p className="text-[13px] text-[#a8a098] max-w-[320px] leading-relaxed mb-7">
+        Your {rating}-star feedback has been recorded. Post it on Google to let others know.
       </p>
 
-      {/* Review preview box with copy button */}
-      <div className="text-left bg-[#f4f1ec] border-l-4 border-[#4285F4] rounded-lg px-4 py-3 max-w-md w-full mb-3 relative">
-        <p className="text-gold text-sm mb-1">{stars}</p>
-        <p className="text-sm text-[var(--text-2)] italic leading-relaxed">"{preview}"</p>
+      {/* Preview */}
+      <div className="w-full bg-[#faf9f7] border border-black/[0.07] rounded-2xl px-5 py-4 mb-6 text-left">
+        <div className="text-[#c49a2a] text-sm mb-2 tracking-wider">{stars}</div>
+        <p className="text-[13px] text-[#6b6456] leading-relaxed italic">"{preview}"</p>
       </div>
 
       {/* Instruction banner — changes based on copy state */}
@@ -71,8 +77,8 @@ export default function StepGoogle({ rating, finalText, googleUrl, onReset }: Pr
         ${copyState === 'idle'    ? 'bg-blue-50 text-blue-700 border border-blue-200'    : ''}
       `}>
         {copyState === 'idle'   && <><span>📋</span> Your review will be copied to clipboard automatically</>}
-        {copyState === 'copied' && <><span>✅</span> Copied! Paste it in the Google review box and hit Post</>}
-        {copyState === 'failed' && <><span>⚠️</span> Could not copy automatically. Please try again or try copying manually.</>}
+        {copyState === 'copied' && <><span>✅</span> Copied! Just paste it in the Google review box and hit Post</>}
+        {copyState === 'failed' && <><span>⚠️</span> Could not copy automatically — please copy the text above manually, then paste on Google</>}
       </div>
 
       {/* Google CTA button */}
@@ -92,9 +98,12 @@ export default function StepGoogle({ rating, finalText, googleUrl, onReset }: Pr
         {redirecting ? 'Opening Google Reviews…' : 'Copy & Post on Google Reviews'}
       </button>
 
-      <button
-        onClick={onReset}
-        className="text-sm text-[var(--text-3)] hover:text-[var(--text-2)] transition-colors"
+      <button onClick={onReset} style={{
+        fontSize: '12px', color: '#b0a898', background: 'none', border: 'none',
+        cursor: 'pointer', transition: 'color 0.15s',
+      }}
+        onMouseEnter={e => { (e.target as HTMLElement).style.color = '#6b6456'; }}
+        onMouseLeave={e => { (e.target as HTMLElement).style.color = '#b0a898'; }}
       >
         Submit another review
       </button>

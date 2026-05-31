@@ -8,7 +8,7 @@ interface Props {
 
 export default function FeedbackPage({ params, searchParams }: Props) {
   const context = {
-    placeId: params?.placeId || 'demo',
+    placeId: "ChIJK9ZfSh-6bTkRJUzXVIgzQTc",
     bizName: searchParams.biz ?? 'O P Maggi Shop',
     category: searchParams.category ?? 'Hotel',
     lang: searchParams.lang ?? 'en',

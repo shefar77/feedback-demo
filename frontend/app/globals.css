@@ -6,40 +6,58 @@
   --accent: #c8441a;
   --accent-hover: #a83612;
   --accent-light: #fdf0ec;
-  --gold: #d4a017;
-  --gold-light: #fdf8ec;
-  --surface: #ffffff;
-  --surface2: #f4f1ec;
-  --border: rgba(0,0,0,0.1);
-  --border-strong: rgba(0,0,0,0.18);
-  --text: #1a1815;
-  --text-2: #5a5650;
-  --text-3: #9a9590;
+  --gold: #c49a2a;
+  --text: #1a1714;
+  --text-2: #6b6456;
+  --text-3: #a8a098;
 }
 
 @keyframes shimmer {
-  0% { background-position: -400px 0; }
-  100% { background-position: 400px 0; }
+  0% { background-position: -600px 0; }
+  100% { background-position: 600px 0; }
 }
 
 .skeleton {
-  background: linear-gradient(90deg, #f0ede8 25%, #e8e4de 50%, #f0ede8 75%);
-  background-size: 800px 100%;
-  animation: shimmer 1.6s infinite;
-  border-radius: 8px;
+  background: linear-gradient(90deg, #ede9e3 25%, #e4e0d8 50%, #ede9e3 75%);
+  background-size: 1200px 100%;
+  animation: shimmer 1.8s infinite;
+  border-radius: 6px;
 }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp 0.35s ease forwards; }
 
 @keyframes pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(0.88); }
+  50% { opacity: 0.4; transform: scale(0.75); }
 }
 
 .pulse-dot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: var(--accent);
-  animation: pulse 1.2s ease-in-out infinite;
+  animation: pulse 1.3s ease-in-out infinite;
+  display: inline-block;
 }
-.pulse-dot:nth-child(2) { animation-delay: 0.2s; }
-.pulse-dot:nth-child(3) { animation-delay: 0.4s; }
+.pulse-dot:nth-child(2) { animation-delay: 0.18s; }
+.pulse-dot:nth-child(3) { animation-delay: 0.36s; }
+
+@keyframes floatA {
+  0%, 100% { transform: translateY(-8px) rotate(-1.5deg); }
+  50%       { transform: translateY(8px)  rotate(-1.5deg); }
+}
+@keyframes floatB {
+  0%, 100% { transform: translateY(8px)  rotate(1.2deg); }
+  50%       { transform: translateY(-8px) rotate(1.2deg); }
+}
+@keyframes floatC {
+  0%, 100% { transform: translateY(-5px) rotate(-0.8deg); }
+  50%       { transform: translateY(5px)  rotate(-0.8deg); }
+}
+.float-a { animation: floatA 7s ease-in-out infinite; }
+.float-b { animation: floatB 8s ease-in-out infinite; }
+.float-c { animation: floatA 9s ease-in-out infinite; animation-delay: 1.5s; }

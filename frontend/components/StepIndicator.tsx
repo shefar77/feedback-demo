@@ -1,40 +1,50 @@
 'use client';
 
 import type { Step } from '../lib/types';
-import clsx from 'clsx';
 
-const STEPS = ['Rate', 'Suggestions', 'Edit', 'Google'];
+const STEPS = ['Rate', 'Suggestions', 'Edit', 'Post'];
 
 export default function StepIndicator({ step }: { step: Step }) {
   return (
-    <div className="flex bg-[#f4f1ec] border-b border-black/10 px-6 py-3">
+    <div style={{
+      display: 'flex', alignItems: 'center',
+      background: '#f9f7f4',
+      borderBottom: '1px solid rgba(0,0,0,0.06)',
+      padding: '14px 24px',
+      gap: '0',
+    }}>
       {STEPS.map((label, i) => {
-        const num = i + 1;
+        const num    = i + 1;
         const done   = num < step;
         const active = num === step;
         return (
-          <div
-            key={label}
-            className={clsx(
-              'flex items-center gap-2 flex-1 text-xs font-medium relative',
-              done   && 'text-green-700',
-              active && 'text-accent',
-              !done && !active && 'text-[var(--text-3)]',
-            )}
-          >
-            <div
-              className={clsx(
-                'w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-semibold shrink-0',
-                done   && 'bg-green-600 text-white',
-                active && 'bg-accent text-white',
-                !done && !active && 'bg-black/10 text-[var(--text-3)]',
-              )}
-            >
-              {done ? '✓' : num}
+          <div key={label} style={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                width: '22px', height: '22px', borderRadius: '50%',
+                fontSize: '10px', fontWeight: 600, lineHeight: 1, flexShrink: 0,
+                background: done ? '#10b981' : active ? '#c8441a' : 'rgba(0,0,0,0.08)',
+                color: done || active ? 'white' : 'rgba(0,0,0,0.3)',
+                transition: 'all 0.3s ease',
+                boxShadow: active ? '0 2px 8px rgba(200,68,26,0.35)' : 'none',
+              }}>
+                {done ? '✓' : num}
+              </span>
+              <span style={{
+                fontSize: '12px', fontWeight: 500,
+                color: done ? '#10b981' : active ? '#c8441a' : 'rgba(0,0,0,0.3)',
+                whiteSpace: 'nowrap',
+              }}>
+                {label}
+              </span>
             </div>
-            {label}
             {i < STEPS.length - 1 && (
-              <div className="absolute right-0 top-1/2 -translate-y-1/2 w-px h-4 bg-black/10" />
+              <div style={{
+                flex: 1, height: '1px', margin: '0 8px',
+                background: num < step ? '#10b981' : 'rgba(0,0,0,0.08)',
+                transition: 'background 0.4s ease',
+              }} />
             )}
           </div>
         );
