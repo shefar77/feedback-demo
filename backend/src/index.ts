@@ -14,17 +14,17 @@ const PORT = process.env.PORT ?? 4000;
 app.use(helmet());
 app.use(cors({ origin: process.env.FRONTEND_URL ?? '*' }));
 app.use(express.json({ limit: '10kb' }));
-app.post('/generate-feedback', async (req, res) => {
-  console.log('HIT generate-feedback');
+// app.post('/generate-feedback', async (req, res) => {
+//   console.log('HIT generate-feedback');
 
-  res.json({
-    suggestions: [
-      "Great experience!",
-      "Loved the service.",
-      "Could improve response time."
-    ]
-  });
-});
+//   res.json({
+//     suggestions: [
+//       "Great experience!",
+//       "Loved the service.",
+//       "Could improve response time."
+//     ]
+//   });
+// });
 app.use(morgan('dev'));
 
 const limiter = rateLimit({

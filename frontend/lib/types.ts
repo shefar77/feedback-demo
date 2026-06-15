@@ -5,7 +5,10 @@ export interface FeedbackContext {
   lang: string;
 }
 
-export type Suggestion = string;
+export interface Suggestion {
+  text: string;
+  tone: string;
+}
 
 export interface GenerateRequest {
   rating: number;

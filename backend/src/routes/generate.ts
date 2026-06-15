@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { generateSuggestions } from '../services/openai';
 import { getRedis } from '../services/redis';
+import { getSuggestionsForRating } from '../services/suggestions';
 
 export const generateRouter = Router();
 
@@ -26,13 +27,7 @@ generateRouter.post('/', async (req: Request, res: Response) => {
 
   try {
     // Try cache first
-    const suggestions = await generateSuggestions({
-      rating,
-      bizName: context.bizName,
-      category: context.category,
-      lang: context.lang,
-      count: 3,
-    });
+    const suggestions = await getSuggestionsForRating(rating);
 
     return res.json({
       suggestions,

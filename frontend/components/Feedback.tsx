@@ -13,6 +13,74 @@ const TONE_COLORS: Record<string, { bg: string; text: string; border: string }> 
   positive: { bg: '#fefce8', text: '#a16207', border: '#fde68a' },
 };
 
+const FALLBACK_POOL: Record<number, { text: string; tone: string }[]> = {
+  1: [
+    { text: 'Had a pretty disappointing experience overall. Several things did not go as expected.', tone: 'Critical' },
+    { text: 'The service was very slow and the staff did not seem attentive. Felt disorganized throughout.', tone: 'Frustrated' },
+    { text: 'Waited much longer than expected and got very little help. Quality was poor.', tone: 'Negative' },
+    { text: 'Too many issues during the visit for it to be enjoyable. Major improvements needed.', tone: 'Dissatisfied' },
+    { text: 'The overall experience was frustrating. Expectations were not met from start to finish.', tone: 'Critical' },
+    { text: 'Service quality was poor and did not feel customer focused at all.', tone: 'Negative' },
+    { text: 'The experience was underwhelming and needs significant improvement honestly.', tone: 'Frustrated' },
+    { text: 'Staff did not seem attentive and the process felt quite unorganized.', tone: 'Disappointed' },
+    { text: 'Faced multiple issues during the visit and they were not handled properly.', tone: 'Critical' },
+    { text: 'Would appreciate major improvements in service and responsiveness going forward.', tone: 'Dissatisfied' },
+  ],
+  2: [
+    { text: 'The experience was below expectations and could be improved in several areas.', tone: 'Honest' },
+    { text: 'Service was a bit inconsistent and the overall process felt slightly disorganized.', tone: 'Disappointed' },
+    { text: 'A few things went well but there were noticeable areas that needed more attention.', tone: 'Mixed' },
+    { text: 'The place was fine but the overall experience felt a bit underwhelming.', tone: 'Measured' },
+    { text: 'Customer handling could have been more attentive and efficient overall.', tone: 'Constructive' },
+    { text: 'Communication could have been clearer throughout the experience.', tone: 'Honest' },
+    { text: 'The service felt average at best and lacked consistency during my visit.', tone: 'Disappointed' },
+    { text: 'Staff were polite but the experience did not feel very smooth or well organized.', tone: 'Mixed' },
+    { text: 'Waiting time was longer than expected and it affected the overall experience.', tone: 'Measured' },
+    { text: 'More attention to detail would greatly improve the customer experience here.', tone: 'Constructive' },
+  ],
+  3: [
+    { text: 'The experience was decent overall with some room for improvement. Nothing bad.', tone: 'Neutral' },
+    { text: 'Service was satisfactory but there were a few delays here and there.', tone: 'Balanced' },
+    { text: 'Everything was alright though nothing particularly stood out during the visit.', tone: 'Fair' },
+    { text: 'The place was comfortable and the service was acceptable. A bit more speed would help.', tone: 'Neutral' },
+    { text: 'Not a bad experience but there is definitely scope for improvement still.', tone: 'Balanced' },
+    { text: 'It was an average experience that met basic expectations, nothing more nothing less.', tone: 'Fair' },
+    { text: 'Things were handled reasonably well throughout the visit overall.', tone: 'Neutral' },
+    { text: 'A few improvements in service speed would make a noticeable difference.', tone: 'Constructive' },
+    { text: 'Staff were helpful and the experience was fairly smooth for the most part.', tone: 'Balanced' },
+    { text: 'The overall experience was fine but could be a bit more consistent.', tone: 'Fair' },
+  ],
+  4: [
+    { text: 'Had a very good experience overall. Everything was managed well and staff were friendly.', tone: 'Positive' },
+    { text: 'The service was quick and the overall process was smooth. Appreciated the professionalism.', tone: 'Warm' },
+    { text: 'The experience was pleasant and exceeded most of my expectations. Happy with the visit.', tone: 'Happy' },
+    { text: 'Had a positive experience and would happily visit again. Service was impressive.', tone: 'Satisfied' },
+    { text: 'Overall very satisfied with the experience and service provided here.', tone: 'Positive' },
+    { text: 'Staff were friendly and made the visit comfortable throughout. Really appreciated it.', tone: 'Warm' },
+    { text: 'The team was helpful and responsive whenever needed. Good experience overall.', tone: 'Satisfied' },
+    { text: 'Really appreciated the professionalism shown throughout my visit. Well done.', tone: 'Happy' },
+    { text: 'Quality of service was impressive and reliable. Would recommend to others.', tone: 'Positive' },
+    { text: 'Everything felt organized and the visit went smoothly from start to finish.', tone: 'Warm' },
+  ],
+  5: [
+    { text: 'Excellent experience from start to finish. Everything was outstanding, could not ask for more.', tone: 'Glowing' },
+    { text: 'The staff were extremely welcoming and attentive. Service was exceptional throughout.', tone: 'Stellar' },
+    { text: 'Highly satisfied with everything. The attention to detail really stood out during the visit.', tone: 'Enthusiastic' },
+    { text: 'Everything was handled perfectly and with great professionalism. One of the best visits I have had.', tone: 'Glowing' },
+    { text: 'Absolutely loved the experience. The team went above and beyond from the very beginning.', tone: 'Exceptional' },
+    { text: 'Service was exceptional and exceeded all expectations. Will definitely be coming back.', tone: 'Stellar' },
+    { text: 'Could not have asked for a better experience. Highly satisfied with everything.', tone: 'Glowing' },
+    { text: 'The entire experience was outstanding. Every single aspect was handled brilliantly.', tone: 'Enthusiastic' },
+    { text: 'Truly exceptional service and quality. Left feeling very impressed and well taken care of.', tone: 'Exceptional' },
+    { text: 'Brilliant experience overall. The staff were fantastic and everything went perfectly.', tone: 'Stellar' },
+  ],
+};
+ 
+function pickRandom<T>(arr: T[], n: number): T[] {
+  const shuffled = [...arr].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, n);
+}
+
 const AMBIENT_REVIEWS = [
   { stars: 5, text: 'Exceptional quality every time. The team genuinely cares.', author: 'Priya M.' },
   { stars: 4, text: 'Really great experience. Will definitely recommend.', author: 'Rahul S.' },
@@ -60,10 +128,7 @@ export default function FeedbackFlow({ context }: Props) {
 
   function handlePickSuggestion(idx: number) {
     setSelectedIdx(idx);
-    const text = typeof suggestions[idx] === 'string'
-      ? suggestions[idx] as unknown as string
-      : suggestions[idx] ?? '';
-    setReviewText(text);
+    setReviewText(suggestions[idx].text);
     setTimeout(() => reviewRef.current?.focus(), 50);
   }
 
@@ -225,12 +290,11 @@ export default function FeedbackFlow({ context }: Props) {
                     <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#059669" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                   </div>
                   <h2 style={{ fontFamily: 'Fraunces,serif', fontSize: 'clamp(22px,4vw,30px)', fontWeight: 300, color: '#1a1714', marginBottom: '8px', letterSpacing: '-0.03em' }}>Opening Google Reviews…</h2>
-                  <p style={{ fontSize: '14px', color: '#a8a098', marginBottom: '20px', lineHeight: 1.6 }}>Your review was copied. A new tab is opening — just paste and hit Post!</p>
+                  <p style={{ fontSize: '14px', color: '#a8a098', marginBottom: '20px', lineHeight: 1.6 }}>Your review was copied. Post on google to let others know!</p>
                   <div style={{ background: '#f9f8f6', borderRadius: '14px', padding: '14px 18px', marginBottom: '20px', textAlign: 'left' }}>
                     <div style={{ color: '#c49a2a', fontSize: '13px', letterSpacing: '3px', marginBottom: '8px' }}>{'★'.repeat(rating)}</div>
                     <p style={{ fontSize: '13px', color: '#6b6456', lineHeight: 1.7, fontStyle: 'italic' }}>"{reviewText.slice(0, 180)}{reviewText.length > 180 ? '…' : ''}"</p>
                   </div>
-                  <p style={{ fontSize: '11px', color: '#b0a898', marginBottom: '20px' }}>On mobile — long press the Google review box → Paste</p>
                   <button onClick={handleReset} style={{ fontSize: '13px', color: '#6b6456', background: 'none', border: '1px solid rgba(0,0,0,0.1)', padding: '8px 20px', borderRadius: '99px', cursor: 'pointer' }}>Submit another review</button>
                 </div>
               ) : (
@@ -292,8 +356,8 @@ export default function FeedbackFlow({ context }: Props) {
                           ) : suggestions.length > 0 ? (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                               {suggestions.map((s, i) => {
-                                const text = typeof s === 'string' ? s as unknown as string : s ?? '';
-                                const st   = typeof s === 'string' ? '' : s ?? '';
+                                const text = s.text;
+                                const st   = s.tone;
                                 const isSel = selectedIdx === i;
                                 return (
                                   <button key={i} className="sug-btn" onClick={() => handlePickSuggestion(i)} style={{ width: '100%', textAlign: 'left', border: 'none', cursor: 'pointer', background: isSel ? '#fdf0ec' : '#f9f8f6', borderRadius: '16px', padding: 'clamp(14px,2.5vw,20px)', outline: isSel ? '2px solid rgba(200,68,26,0.4)' : '1px solid rgba(0,0,0,0.07)', boxShadow: isSel ? '0 4px 16px rgba(200,68,26,0.14)' : 'none', transition: 'all 0.2s ease' }}>
@@ -303,7 +367,6 @@ export default function FeedbackFlow({ context }: Props) {
                                       </div>
                                       <div style={{ flex: 1, minWidth: 0 }}>
                                         <p style={{ fontSize: 'clamp(13px,2vw,14.5px)', lineHeight: 1.72, color: '#1a1714', margin: 0, wordBreak: 'break-word' }}>{text}</p>
-                                        {st && <span style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.07em', color: '#a8a098', display: 'block', marginTop: '8px' }}>{st}</span>}
                                       </div>
                                     </div>
                                   </button>
