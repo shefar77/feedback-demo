@@ -75,8 +75,8 @@ export default function StepSuggestions({ rating, suggestions, selectedIdx, load
           {suggestions.map((s, i) => {
             const isSelected = selectedIdx === i;
             const isHovered  = hoveredIdx === i;
-            const text = typeof s === 'string' ? s : (s ?? '');
-            const tone = typeof s === 'string' ? '' : (s ?? '');
+            const text = typeof s === 'string' ? s : s.text;
+            const tone = typeof s === 'string' ? '' : s.tone;
 
             return (
               <button

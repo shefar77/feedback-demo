@@ -355,7 +355,7 @@ export default function FeedbackFlow({ context }: Props) {
                             </div>
                           ) : suggestions.length > 0 ? (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                              {suggestions.map((s: any, i) => {
+                              {suggestions.map((s, i) => {
                                 const text = s.text;
                                 const st   = s.tone;
                                 const isSel = selectedIdx === i;
