@@ -355,7 +355,7 @@ export default function FeedbackFlow({ context }: Props) {
                             </div>
                           ) : suggestions.length > 0 ? (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                              {suggestions.map((s, i) => {
+                              {suggestions.map((s: any, i) => {
                                 const text = s.text;
                                 const st   = s.tone;
                                 const isSel = selectedIdx === i;
@@ -366,7 +366,9 @@ export default function FeedbackFlow({ context }: Props) {
                                         {isSel && <svg width="9" height="7" viewBox="0 0 8 6" fill="none"><path d="M1 3l2 2 4-4" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>}
                                       </div>
                                       <div style={{ flex: 1, minWidth: 0 }}>
-                                        <p style={{ fontSize: 'clamp(13px,2vw,14.5px)', lineHeight: 1.72, color: '#1a1714', margin: 0, wordBreak: 'break-word' }}>{text}</p>
+                                        <p style={{ fontSize: 'clamp(13px,2vw,14.5px)', lineHeight: 1.72, color: '#1a1714', margin: 0, wordBreak: 'break-word' }}>
+                                          {text}
+                                        </p>
                                       </div>
                                     </div>
                                   </button>
