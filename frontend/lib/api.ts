@@ -13,12 +13,24 @@ const api = axios.create({
 
 export async function generateFeedback(payload: GenerateRequest): Promise<GenerateResponse> {
   const { data } = await api.post<GenerateResponse>('/generate-feedback', payload);
-  console.log('API RESPONSE:', JSON.stringify(data, null, 2));
-  return data;
+  const suggestions = (data.suggestions ?? []).map((s: unknown) => {
+    if(typeof s === 'string'){
+      return { text: s, tone: 'General' };
+    }
+    if(typeof s === 'object' && s !== null && 'text' in s){
+      return s as { text: string; tone: string };
+    }
+    return { text: String(s), tone: 'General' };
+  });
+  return { ...data, suggestions };
 }
 
-export async function submitFeedback(payload: SubmitRequest): Promise<SubmitResponse> {
-  const { data } = await api.post<SubmitResponse>('/submit-feedback', payload);
+export async function submitFeedback(
+  payload: SubmitRequest,
+  token?: string,): Promise<SubmitResponse> {
+  const headers: Record<string, string> = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const { data } = await api.post<SubmitResponse>('/submit-feedback', payload, { headers });
   return data;
 }
 

@@ -3,7 +3,9 @@
 import { useState, useEffect, useRef } from 'react';
 import type { FeedbackContext, Suggestion } from '../lib/types';
 import { generateFeedback, submitFeedback, buildGoogleReviewUrl } from '../lib/api';
-import { RATING_LABELS, TONE_INFO } from '../lib/constants';
+import { RATING_LABELS, TONE_INFO, RATING_TAGS } from '../lib/constants';
+import { getToken, getStoredUser, logout } from '../lib/auth';
+import { useRouter } from 'next/navigation';
 
 interface Props { context: FeedbackContext; }
 
@@ -94,6 +96,7 @@ const RECENT_ACTIVITY = [
 ];
 
 export default function FeedbackFlow({ context }: Props) {
+  const router = useRouter();
   const [rating, setRating]           = useState(0);
   const [hovered, setHovered]         = useState(0);
   const [reviewText, setReviewText]   = useState('');
@@ -107,8 +110,16 @@ export default function FeedbackFlow({ context }: Props) {
   const [focused, setFocused]         = useState(false);
   const [mounted, setMounted]         = useState(false);
   const reviewRef                     = useRef<HTMLTextAreaElement>(null);
+  const [authUser, setAuthUser]       = useState<any>(null);
+  const [toast, setToast]             = useState<{ msg: string; pts?: number; badges?: string[] } | null>(null);
 
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => { 
+    setMounted(true);
+    const u = getStoredUser();
+    if (u){
+      setAuthUser(u);
+    } 
+  }, []);
 
   const active     = hovered || rating;
   const tone       = rating ? TONE_INFO[rating] : null;
@@ -122,13 +133,18 @@ export default function FeedbackFlow({ context }: Props) {
       const res = await generateFeedback({ rating: r, context });
       setSuggestions(res.suggestions ?? []);
     } catch {
+      const pool = FALLBACK_POOL[r] ?? FALLBACK_POOL[3];
+      setSuggestions(pickRandom(pool, 5));
       setError('Could not load suggestions — you can still write your own review below.');
     } finally { setLoadingAI(false); }
   }
 
   function handlePickSuggestion(idx: number) {
     setSelectedIdx(idx);
-    setReviewText(suggestions[idx].text);
+    const text = typeof suggestions[idx] === 'string'
+      ? suggestions[idx] as unknown as string
+      : suggestions[idx]?.text ?? '';
+    setReviewText(text);
     setTimeout(() => reviewRef.current?.focus(), 50);
   }
 
@@ -136,6 +152,7 @@ export default function FeedbackFlow({ context }: Props) {
     if (!rating || !reviewText.trim()) return;
     setSubmitting(true);
     const googleUrl = buildGoogleReviewUrl(context.placeId);
+    const token = getToken();
     submitFeedback({
       rating, 
       context: {
@@ -144,8 +161,15 @@ export default function FeedbackFlow({ context }: Props) {
         category: context.category, 
         lang: context.lang,
       },
-      text: editedText,
-    }).catch(() => {});
+      text: editedText, 
+    })
+    .then(res => {
+      if (res.pointsAwarded > 0) {
+        setToast({ msg: 'Points earned!', pts: res.pointsAwarded, badges: res.newBadges });
+        setTimeout(() => setToast(null), 4000);
+      }
+    })
+    .catch(() => {});
     try { await navigator.clipboard.writeText(reviewText); } catch {}
     setSubmitted(true);
     setSubmitting(false);
@@ -244,18 +268,47 @@ export default function FeedbackFlow({ context }: Props) {
       <div className="ff-page">
         <div className="ff-inner">
 
+           {toast && (
+            <div style={{ position: 'fixed', top: '20px', right: '20px', zIndex: 9999, background: 'rgba(30,26,22,0.96)', border: '1px solid rgba(196,154,42,0.4)', borderRadius: '16px', padding: '14px 20px', boxShadow: '0 8px 32px rgba(0,0,0,0.4)', backdropFilter: 'blur(20px)', minWidth: '220px', animation: 'fadeUp 0.3s ease' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '22px' }}>⭐</span>
+                <div>
+                  <p style={{ fontSize: '13px', fontWeight: 600, color: '#c49a2a', margin: '0 0 2px' }}>+{toast.pts} points earned!</p>
+                  <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)', margin: 0 }}>{toast.msg}</p>
+                  {toast.badges && toast.badges.length > 0 && (
+                    <p style={{ fontSize: '11px', color: '#4ade80', margin: '4px 0 0' }}>🏅 New badge: {toast.badges.join(', ')}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Nav */}
-          <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+          <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', flexWrap: 'wrap', gap: '10px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#c8441a', boxShadow: '0 0 10px rgba(200,68,26,0.7)', flexShrink: 0 }} />
               <span style={{ fontFamily: 'Fraunces,serif', fontSize: 'clamp(15px,2vw,18px)', color: 'rgba(255,255,255,0.88)', fontWeight: 300, letterSpacing: '-0.02em' }}>
                 Feedback Portal
               </span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
               <span style={{ fontSize: 'clamp(10px,1.5vw,12px)', color: 'rgba(255,255,255,0.45)', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', padding: '5px 14px', borderRadius: '99px', whiteSpace: 'nowrap' }}>
                 {context.bizName}
               </span>
+              {authUser ? (
+                <>
+                  <button onClick={() => router.push('/dashboard')} style={{ fontSize: '12px', color: '#c49a2a', background: 'rgba(196,154,42,0.1)', border: '1px solid rgba(196,154,42,0.25)', padding: '5px 14px', borderRadius: '99px', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                    ⭐ {authUser.points ?? 0} pts
+                  </button>
+                  <button onClick={async () => { await logout(); setAuthUser(null); }} style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', padding: '5px 12px', borderRadius: '99px', cursor: 'pointer' }}>
+                    Sign out
+                  </button>
+                </>
+              ) : (
+                <button onClick={() => router.push('/login')} style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', padding: '5px 14px', borderRadius: '99px', cursor: 'pointer' }}>
+                  Sign in to earn points →
+                </button>
+              )}
             </div>
           </nav>
 
@@ -408,9 +461,9 @@ export default function FeedbackFlow({ context }: Props) {
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '10px', flexWrap: 'wrap', gap: '8px' }}>
                             <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                              {[['+ Staff', ' The staff were incredibly helpful.'], ['+ Food', ' The food was delicious.'], ['+ Ambience', ' Lovely atmosphere.'], ['+ Return', ' Will definitely be back!']].map(([label, text]) => (
+                              {(RATING_TAGS[rating] ?? []).map(({ label, text }) => (
                                 <button key={label} className="quick-btn" onClick={() => setReviewText(t => (t + text).trim())} style={{ fontSize: '11px', fontWeight: 500, padding: '5px 12px', borderRadius: '99px', border: '1px solid rgba(0,0,0,0.1)', background: 'transparent', color: '#6b6456', cursor: 'pointer', transition: 'background 0.15s' }}>
-                                  {label}
+                                  + {label}
                                 </button>
                               ))}
                             </div>
