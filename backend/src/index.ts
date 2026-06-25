@@ -7,13 +7,17 @@ import rateLimit from 'express-rate-limit';
 import { generateRouter } from './routes/generate';
 import { submitRouter } from './routes/submit';
 import { analyticsRouter } from './routes/analytics';
+import { authRouter }      from './routes/auth';
+import { dashboardRouter } from './routes/dashboard';
 
 const app = express();
 const PORT = process.env.PORT ?? 4000;
 
+app.set('trust proxy', 1);
 app.use(helmet());
-app.use(cors({ origin: process.env.FRONTEND_URL ?? '*' }));
+app.use(cors({ origin: process.env.FRONTEND_URL ?? '*', credentials: true }));
 app.use(express.json({ limit: '10kb' }));
+app.use(morgan('dev'));
 // app.post('/generate-feedback', async (req, res) => {
 //   console.log('HIT generate-feedback');
 
@@ -25,15 +29,16 @@ app.use(express.json({ limit: '10kb' }));
 //     ]
 //   });
 // });
-app.use(morgan('dev'));
 
 const limiter = rateLimit({
   windowMs: 60 * 1000,  
   max: 30,
   message: { error: 'Too many requests, please try again later.' },
 });
-app.use('/generate-feedback', limiter);
 
+app.use('/generate-feedback', limiter);
+app.use('/auth',              authRouter);
+app.use('/dashboard',         dashboardRouter);
 app.use('/generate-feedback', generateRouter);
 app.use('/submit-feedback',   submitRouter);
 app.use('/analytics',         analyticsRouter);

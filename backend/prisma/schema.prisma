@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model FeedbackEvent {
@@ -18,4 +18,91 @@ model FeedbackEvent {
   suggestionIndex  Int
   edited           Boolean
   createdAt        DateTime @default(now())
+  userId          String?
+  user            User?    @relation(fields: [userId], references: [id])
+
+
+  @@index([placeId])
+  @@index([rating])
+  @@index([createdAt])
+  @@index([userId])
+  @@map("feedback_events")
+}
+
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  name            String
+  passwordHash    String
+  avatarUrl       String?
+  bio             String?
+  isVerified      Boolean   @default(false)
+  resetToken      String?
+  resetTokenExp   DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  lastLoginAt     DateTime?
+
+  points          Int       @default(0)
+  level           Int       @default(1)
+  totalFeedback   Int       @default(0)
+  referralCode    String    @unique @default(cuid())
+  referredBy      String?
+
+  feedbackEvents  FeedbackEvent[]
+  pointsHistory   PointsEvent[]
+  badges          UserBadge[]
+  sessions        Session[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+  @@map("sessions")
+}
+
+model PointsEvent {
+  id          String   @id @default(cuid())
+  userId      String
+  points      Int
+  action      String
+  description String
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("points_events")
+}
+
+model Badge {
+  id          String      @id @default(cuid())
+  key         String      @unique
+  name        String
+  description String
+  icon        String
+  threshold   Int         @default(0)
+  users       UserBadge[]
+
+  @@map("badges")
+}
+
+model UserBadge {
+  id        String   @id @default(cuid())
+  userId    String
+  badgeId   String
+  earnedAt  DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge     Badge    @relation(fields: [badgeId], references: [id])
+
+  @@unique([userId, badgeId])
+  @@map("user_badges")
 }
