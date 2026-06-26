@@ -53,6 +53,7 @@ model User {
   pointsHistory   PointsEvent[]
   badges          UserBadge[]
   sessions        Session[]
+  googleAccount   GoogleAccount?
 
   @@map("users")
 }
@@ -68,6 +69,17 @@ model Session {
   @@index([token])
   @@index([userId])
   @@map("sessions")
+}
+
+model GoogleAccount {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  googleId      String   @unique
+  email         String
+  createdAt     DateTime @default(now())
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("google_accounts")
 }
 
 model PointsEvent {

@@ -9,6 +9,7 @@ import { submitRouter } from './routes/submit';
 import { analyticsRouter } from './routes/analytics';
 import { authRouter }      from './routes/auth';
 import { dashboardRouter } from './routes/dashboard';
+import { googleAuthRouter } from './routes/googleAuth';
 
 const app = express();
 const PORT = process.env.PORT ?? 4000;
@@ -38,6 +39,7 @@ const limiter = rateLimit({
 
 app.use('/generate-feedback', limiter);
 app.use('/auth',              authRouter);
+app.use('/auth',              googleAuthRouter);
 app.use('/dashboard',         dashboardRouter);
 app.use('/generate-feedback', generateRouter);
 app.use('/submit-feedback',   submitRouter);
