@@ -1,43 +1,48 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { setToken, setStoredUser } from '../../lib/auth';
-import { Suspense } from 'react';
 
 function CallbackHandler() {
   const router       = useRouter();
-  const params       = useSearchParams();
+  const searchParams       = useSearchParams();
   const [msg, setMsg] = useState('Signing you in…');
 
   useEffect(() => {
-    const token   = params.get('token');
-    const userStr = params.get('user');
-    const error   = params.get('error');
+    const token   = searchParams.get('token');
+    const userB64    = searchParams.get('user');
+    const isNewUser  = searchParams.get('newUser') === 'true';
+    const error   = searchParams.get('error');
 
     if (error) {
       setMsg(error === 'google_cancelled' ? 'Sign-in cancelled.' : 'Google sign-in failed. Please try again.');
+      setMsg(msg);
       setTimeout(() => router.push('/login'), 2000);
       return;
     }
 
-    if (!token || !userStr) {
-      setMsg('Something went wrong.');
+    if (!token || !userB64) {
+      console.error('OAuth callback missing params', { token: !!token, userB64: !!userB64 });
+      setMsg('Authentication failed - missing session data.');
       setTimeout(() => router.push('/login'), 2000);
       return;
     }
 
     try {
-      const user = JSON.parse(userStr);
+      const decoded = atob(userB64);
+      const user = JSON.parse(decoded);
       setToken(token);
       setStoredUser(user);
-      setMsg(`Welcome${params.get('newUser') === 'true' ? '! Account created' : ' back'}, ${user.name}!`);
+
+      setMsg(`Welcome${isNewUser ? '! Account created' : ' back'}, ${user.name}!`);
       setTimeout(() => router.push('/dashboard'), 1000);
-    } catch {
+    } catch (e) {
+      console.error('Failed to decode user payload:', e);
       setMsg('Something went wrong.');
       setTimeout(() => router.push('/login'), 2000);
     }
-  }, []);
+  }, [searchParams, router]);
 
   return (
     <div style={{ minHeight: '100vh', background: '#0f0d0b', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '20px' }}>
@@ -56,7 +61,7 @@ function CallbackHandler() {
   );
 }
 
-export default function Page() {
+export default function CallbackPage() {
   return (
     <Suspense fallback={
       <div style={{ minHeight: '100vh', background: '#0f0d0b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

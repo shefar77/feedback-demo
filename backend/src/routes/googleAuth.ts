@@ -28,14 +28,14 @@ googleAuthRouter.get('/google/callback', async (req: Request, res: Response) => 
     const tokens  = await exchangeCodeForTokens(code as string);
     const profile = await getGoogleProfile(tokens.access_token);
 
+    let user: any;
+    let isNewUser = false;
+
     // Check if Google account already linked
-    let googleAccount = await prisma.googleAccount.findUnique({
+    const googleAccount = await prisma.googleAccount.findUnique({
       where: { googleId: profile.id },
       include: { user: true },
     });
-
-    let user: any;
-    let isNewUser = false;
 
     if (googleAccount) {
       // Existing Google user ko login hi kar dena hai
@@ -48,7 +48,6 @@ googleAuthRouter.get('/google/callback', async (req: Request, res: Response) => 
         await awardPoints(user.id, 'DAILY_LOGIN');
       }
       await prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
-
     } 
     else {
       // Check if email already exists
@@ -86,15 +85,15 @@ googleAuthRouter.get('/google/callback', async (req: Request, res: Response) => 
       select: { id: true, name: true, email: true, avatarUrl: true, points: true, level: true, totalFeedback: true, referralCode: true },
     });
     const levelInfo = getLevelForPoints(freshUser!.points);
-    const params = new URLSearchParams({
-      token,
-      user:     JSON.stringify({ ...freshUser, levelInfo }),
-      newUser:  String(isNewUser),
-    });
+    const userPayload = Buffer.from(JSON.stringify({ ...freshUser, levelInfo })).toString('base64');
 
-    return res.redirect(`${frontendUrl}/auth/callback?${params}`);
-
-  } catch (err) {
+    const redirectUrl = new URL(`${frontendUrl}/auth/callback`);
+    redirectUrl.searchParams.set('token',   token);
+    redirectUrl.searchParams.set('user',    userPayload);
+    redirectUrl.searchParams.set('newUser', String(isNewUser));
+    console.log('OAuth success — redirecting to:', redirectUrl.toString());
+    return res.redirect(redirectUrl.toString());
+  } catch (err: any) {
     console.error('Google OAuth error:', err);
     return res.redirect(`${process.env.FRONTEND_URL ?? 'http://localhost:3000'}/login?error=google_failed`);
   }
