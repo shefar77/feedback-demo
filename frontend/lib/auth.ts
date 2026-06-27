@@ -2,6 +2,17 @@ import axios from 'axios';
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
 
+function getCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+  return match ? decodeURIComponent(match[2]) : null;
+}
+
+function deleteCookie(name: string) {
+  if (typeof document === 'undefined') return;
+  document.cookie = `${name}=; path=/; max-age=0`;
+}
+
 export function getToken(): string | null {
   if (typeof window === 'undefined') return null;
   return localStorage.getItem('ff_token');
@@ -23,6 +34,22 @@ export function getStoredUser() {
 
 export function setStoredUser(user: any) {
   localStorage.setItem('ff_user', JSON.stringify(user));
+}
+
+export function hydrateCookieAuth() {
+  if (typeof window === 'undefined') return false;
+  const cookieToken = getCookie('ff_token');
+  const cookieUser  = getCookie('ff_user');
+  if (cookieToken && !localStorage.getItem('ff_token')) {
+    localStorage.setItem('ff_token', cookieToken);
+    if (cookieUser) {
+      try { localStorage.setItem('ff_user', JSON.parse(cookieUser) ? cookieUser : ''); } catch {}
+    }
+    deleteCookie('ff_token');
+    deleteCookie('ff_user');
+    return true;
+  }
+  return false;
 }
 
 export const authApi = axios.create({ baseURL: API, timeout: 15000 });

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { fetchDashboard, logout, getToken, updateProfile } from '../../lib/auth';
+import { fetchDashboard, logout, getToken, updateProfile, hydrateCookieAuth } from '../../lib/auth';
 import type { DashboardData } from '../../lib/types';
 
 export default function Dashboard() {
@@ -18,6 +18,7 @@ export default function Dashboard() {
   const [copyMsg, setCopyMsg]       = useState('');
 
   useEffect(() => {
+    hydrateCookieAuth();
     if (!getToken()) { router.push('/login'); return; }
     fetchDashboard().then(d => { setData(d); setLoading(false); }).catch(() => { router.push('/login'); });
   }, []);

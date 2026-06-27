@@ -122,8 +122,7 @@ export default function AuthForm({ mode, resetToken }: Props) {
             <>
               <div style={S.divider}><div style={S.line}/><span>or</span><div style={S.line}/></div>
               <a
-                href={`${API_URL}/auth/google`}
-                style={{
+                href={`${API_URL}/auth/google?redirect_uri=${encodeURIComponent(typeof window !== 'undefined' ? window.location.origin + 'api/auth/google-callback' : '')}`}                style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
                   width: '100%', padding: '12px', borderRadius: '14px',
                   border: '1.5px solid rgba(0,0,0,0.12)', background: '#fff',
