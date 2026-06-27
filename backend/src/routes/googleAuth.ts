@@ -27,7 +27,7 @@ googleAuthRouter.get('/google/callback', async (req: Request, res: Response) => 
     return res.redirect(`${frontendUrl}/login?error=google_failed`);
   }
   const userPayload = Buffer.from(JSON.stringify(result.user)).toString('base64');
-  const redirectUrl = new URL(`${frontendUrl}/auth/callback`);
+  const redirectUrl = new URL(`${frontendUrl}/auth/google-callback`);
   redirectUrl.searchParams.set('token',   result.token);
   redirectUrl.searchParams.set('user',    userPayload);
   redirectUrl.searchParams.set('newUser', String(result.isNewUser));
