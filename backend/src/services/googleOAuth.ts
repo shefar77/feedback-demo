@@ -18,34 +18,14 @@ export function getGoogleAuthUrl(redirectUri?: string): string {
 }
 
 export async function exchangeCodeForTokens(code: string, redirectUri?: string) {
-  const params = new URLSearchParams({
+  const { data } = await axios.post('https://oauth2.googleapis.com/token', {
     code,
-    client_id: GOOGLE_CLIENT_ID,
+    client_id:     GOOGLE_CLIENT_ID,
     client_secret: GOOGLE_CLIENT_SECRET,
-    redirect_uri: redirectUri ?? DEFAULT_REDIRECT_URI,
-    grant_type: 'authorization_code',
+    redirect_uri:  redirectUri ?? DEFAULT_REDIRECT_URI,
+    grant_type:    'authorization_code',
   });
-
-  console.log(
-    'Using Redirect URI:',
-    redirectUri ?? DEFAULT_REDIRECT_URI
-  );
-
-  const { data } = await axios.post(
-    'https://oauth2.googleapis.com/token',
-    params.toString(),
-    {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-    }
-  );
-
-  return data as {
-    access_token: string;
-    id_token: string;
-    refresh_token?: string;
-  };
+  return data as { access_token: string; id_token: string; refresh_token?: string };
 }
 
 export async function getGoogleProfile(accessToken: string) {
